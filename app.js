@@ -3,16 +3,40 @@ const bodyParser = require("body-parser");
 const config = require('./config');
 
 
+// importing routes
+const userRoutes = require('./routes/user');
 //database requirements
 const Sequel = require('./database');
-const User = require('./model/user');
-const Member = require('./model/member');
-const Address = require('./model/address');
+const User = require('./models/user');
+const Member = require('./models/member');
+const Address = require('./models/address');
 
 // init app or server
 const app = express();
 
 app.use(bodyParser.json()); //for parsing application/json
+
+// http methods allowed by this API
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader(
+      'Access-Control-Allow-Methods',
+      'OPTIONS, GET, POST, PUT, PATCH, DELETE'
+    );
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    next();
+  });
+
+app.use('/user', userRoutes); // userRoutes as handler for /user routes
+
+//error handling middleware
+app.use((error, req, res, next) => {
+    console.log(error);
+    const status = error.statusCode || 500;
+    const message = error.message;
+    const data = error.data;
+    res.status(status).json({ message: message, data: data });
+  });
 
 //establishing database relations
 User.hasMany(Member);
