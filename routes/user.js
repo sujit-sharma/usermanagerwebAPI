@@ -1,5 +1,5 @@
 const express = require('express');
-const { body } = require('express-validator/check');
+const { body } = require('express-validator');
 
 const User = require('../models/user');
 const userController = require('../controllers/user');
@@ -11,15 +11,22 @@ router.get('/',userController.getTest);
 
 router.post('/signup', 
 [
-    body('username')
+     body('username')
         .trim() 
-        .isEmpty(),
+    //     //.withMessage('Enter username without whitespaces')
+       //  .isEmpty()
+       ,
 
     body('email')
         .isEmail()
         .normalizeEmail()
         .custom((value , { req }) => {
-            return User.findOne({email: value})
+            return User.findOne({
+                attributes: ['email'],
+                where: {
+                    email: value
+                }
+                })
             .then(user => {
                 if(user) {
                     return Promise.reject('Email address already exist');
@@ -38,6 +45,6 @@ router.post('/signup',
 userController.postSignup
 );
 
-router.post('/login', userController.postLogin);
+// router.post('/login', userController.postLogin);
 
 module.exports = router;
