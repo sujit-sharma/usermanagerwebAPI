@@ -16,6 +16,7 @@ const app = express();
 
 app.use(bodyParser.json()); //for parsing application/json
 
+
 // http methods allowed by this API
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
@@ -27,7 +28,8 @@ app.use((req, res, next) => {
     next();
   });
 
-app.use('/user', userRoutes); // userRoutes as handler for /user routes
+
+app.use('/api/user', userRoutes); // userRoutes as handler for /user routes
 
 //error handling middleware
 app.use((error, req, res, next) => {
@@ -44,7 +46,7 @@ Member.hasOne(Address);
 
 const port = config.port || 8090;
 // synchronizing with database
-Sequel.sync({force: true}) 
+Sequel.sync({force: false}) 
     // starting node js server
     .then( app.listen(port, err => {
         if(err) console.log(err);

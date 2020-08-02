@@ -1,6 +1,7 @@
 const { validationResult } = require('express-validator');
 const bcrypt = require('bcrypt');
 const { v4 : uuid } = require('uuid');
+const { Op } = require('sequelize');
 
 
 const User = require('../models/user');
@@ -37,5 +38,69 @@ exports.postSignup = (req, res, next ) => {
             }
             next(err);
         });
+
+}
+
+exports.postLogin = (req, res, next ) => {
+
+    const username = req.body.username;
+    const password = req.body.password;
+
+    User.findOne({
+        where: { 
+            username: username            
+        }
+    })
+    .then(validuser => {
+        return bcrypt.compare(password, validuser.password);
+
+    })
+    .then(isEqual => {
+        if (! isEqual) {
+            const error = new Error('Wrong username or password');
+            error.statusCode = 401;
+            throw error;
+        }
+        res.status(201).json({ message: 'Login Sucess'})
+
+    })
+    .catch(err => {
+        if (!err.statusCode ) {
+            err.statusCode = 500;
+
+        }
+        next(err);
+    });
+
+
+}
+
+exports.getUserDetail = (req, res, next ) => {
+
+    const userId = req.params.userId;
+
+    User.findOne({
+        where: {
+            id: userId
+        }
+    })
+    .then(userdetail => {
+        if (!userdetail) {
+            const error = new Error('User does not exist');
+            error.statusCode = 400;
+            throw error;
+        }
+        res.status(200).json({ message: 'User detail received' , userId : userdetail.id,
+                                username: userdetail.username, password : userdetail.password,
+                                email: userdetail.email
+                            })
+    })
+    .catch(err =>{
+        if(!err.statusCode) {
+            err.statusCode = 500;
+        }
+        next(err);
+    })
+
 
 }

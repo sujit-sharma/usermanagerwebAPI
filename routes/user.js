@@ -7,13 +7,13 @@ const userController = require('../controllers/user');
 
 const router = express.Router();
 
-router.get('/',userController.getTest);
+//router.get('/',userController.getTest);
 
 router.post('/signup', 
 [
      body('username')
         .trim() 
-    //     //.withMessage('Enter username without whitespaces')
+        //.withMessage('Enter username without whitespaces')
        //  .isEmpty()
        ,
 
@@ -45,6 +45,9 @@ router.post('/signup',
 userController.postSignup
 );
 
-// router.post('/login', userController.postLogin);
+router.post('/login',userController.postLogin);
+
+router.get('/:userId', userController.getUserDetail)
+
 
 module.exports = router;
