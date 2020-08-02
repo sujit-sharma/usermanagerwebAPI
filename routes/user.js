@@ -23,7 +23,7 @@ router.post('/signup',
                 attributes: ['email'],
                 where: {
                     email: value
-                }
+    }
                 })
             .then(user => {
                 if(user) {
@@ -64,6 +64,21 @@ router.put('/update/:userId' ,
       // .isAlphanumeric()
        
 ], userController.putUserUpdate );
+
+router.put('/:userId/addmember', 
+[
+    body('email')
+    //.isEmail()
+    .normalizeEmail(),
+
+], userController.putNewMember);
+
+router.put('/:userId/updatemember', 
+[
+
+
+],userController.putMemberUpdate );
+
 
 
 module.exports = router;

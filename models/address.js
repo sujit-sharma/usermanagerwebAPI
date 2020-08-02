@@ -3,12 +3,7 @@ const Sequelize = require('sequelize');
 const sequelize = require('../database');
 
 const Address = sequelize.define('address', {
-    // addressid: {
-    //     type: Sequelize.INTEGER,
-    //     primaryKey: true,
-    //     autoIncrement: true,
-    //     allowNull: false,
-    // },
+
     provision : {
         type: Sequelize.INTEGER,
         allowNull: false,
@@ -22,7 +17,6 @@ const Address = sequelize.define('address', {
     },
 
 });
-Address.removeAttribute('id');
 
 
 module.exports = Address;

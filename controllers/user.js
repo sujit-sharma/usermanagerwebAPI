@@ -5,6 +5,8 @@ const { Op } = require('sequelize');
 
 
 const User = require('../models/user');
+const Member = require('../models/member');
+const Address = require('../models/address');
 
 
 
@@ -49,6 +51,11 @@ exports.postLogin = (req, res, next ) => {
         }
     })
     .then(validuser => {
+        if(!validuser) {
+            const error = new Error('User does not exist');
+            error.statusCode = 401;
+            throw error;
+        }
         return bcrypt.compare(password, validuser.password);
 
     })
@@ -125,13 +132,16 @@ exports.putUserUpdate = (req, res, next ) => {
             error.statusCode = 404;
             throw err;
         }
-        User.update({   email: email,
-                        username: username,
-                        password: password
-                    },
-                    {
-                        where: { id : userId }
-        })
+        bcrypt.hash(password, 16)
+        .then(hashedPasswd => {
+            return User.update({   email: email,
+                                    username: username,
+                                    password: hashedPasswd
+                }, {
+                where: { id : userId }
+                })
+            })
+     
         .then(updatedUser => {
             res.status(200).json({ message: 'User update successfully'});
         })
@@ -144,3 +154,107 @@ exports.putUserUpdate = (req, res, next ) => {
     })
 
 } 
+
+exports.putNewMember = (req, res, next ) => {
+    const userId = req.params.userId;
+    console.log("user is11111" +userId);
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const error = new Error('Validation failed, entered data is incorrect.');
+      error.statusCode = 422;
+      throw error;
+    }
+    const fname = req.body.fname;
+    const lname = req.body.lname;
+    const email = req.body.email;
+    const phone = req.body.phone;
+    const provision = req.body.provision;
+    const district = req.body.district;
+    const city = req.body.city;
+
+    User.findOne({
+        where: {
+            id: userId
+        }
+    })
+    .then(user => {
+        if( !user) {
+            const error = new Error('Unauthorize ');
+            error.statusCode = 401;
+            throw error;
+
+        }
+        Member.findOne({
+            where:  { email: email }
+        })
+        Member.create({
+            lname: lname,
+            fname :fname,
+            email: email, 
+            phone: phone        
+        },{
+            include: [{ model: Address ({provision: provision, district: district,city: city })}]
+        })
+        .then(result => {
+            res.status(200).json({ message: 'Member added successfully',  result });
+          })
+        
+    })
+    .catch(err => {
+        if (!err.statusCode) {
+          err.statusCode = 500;
+        }
+        next(err);
+      });
+
+}
+
+exports.putMemberUpdate = (req, res, next ) => {
+    const userId = req.params.userId;
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      const error = new Error('Validation failed, entered data is incorrect.');
+      error.statusCode = 422;
+      throw error;
+    }
+    const fname = req.body.fname;
+    const lname = req.body.lname;
+    const email = req.body.email;
+    const phone = req.body.phone;
+    const provision = req.body.provision;
+    const district = req.body.district;
+    const city = req.body.city;
+
+    User.findOne({
+        where: {
+            id: userId
+        }
+    })
+    .then(user => {
+        if( !user) {
+            const error = new Error('Unauthorize ');
+            error.statusCode = 401;
+            throw error;
+
+        }
+        Member.update({
+            lname: lname,
+            fname :fname,
+            email: email, 
+            phone: phone        
+        },{
+            include: [{ model: Address ({provision: provision, district: district,city: city })}]
+        })
+        .then(result => {
+            res.status(200).json({ message: 'Member updated successfully',  result });
+          })
+        
+    })
+    .catch(err => {
+        if (!err.statusCode) {
+          err.statusCode = 500;
+        }
+        next(err);
+      });
+
+}
