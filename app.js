@@ -5,6 +5,7 @@ const config = require('./config');
 
 // importing routes
 const userRoutes = require('./routes/user');
+const authRoutes = require('./routes/auth');
 //database requirements
 const Sequel = require('./database');
 const User = require('./models/user');
@@ -30,6 +31,7 @@ app.use((req, res, next) => {
 
 
 app.use('/api/user', userRoutes); // userRoutes as handler for /user routes
+app.use('/api/auth', authRoutes);
 
 //error handling middleware
 app.use((error, req, res, next) => {
