@@ -6,9 +6,6 @@ const { Op } = require('sequelize');
 
 const User = require('../models/user');
 
-exports.getTest = (req, res) => {
-    res.send('hello node');
-}
 
 
 exports.postSignup = (req, res, next ) => {
@@ -104,3 +101,46 @@ exports.getUserDetail = (req, res, next ) => {
 
 
 }
+exports.putUserUpdate = (req, res, next ) => {
+    const userId = req.params.userId;
+    const errors = validationResult(req);
+    if( !errors.isEmpty ()) {
+        const error = new Error('Validation failed , enter correct data');
+        error.statusCode =422;
+        throw error;
+    }
+
+    const email = req.body.email;
+    const username = req.body.username;
+    const password = req.body.password;
+
+    User.findOne({
+        where: {
+            id: userId
+        }
+    })
+    .then(user => {
+        if(!user ) {
+            const error = new Error('Could not find user');
+            error.statusCode = 404;
+            throw err;
+        }
+        User.update({   email: email,
+                        username: username,
+                        password: password
+                    },
+                    {
+                        where: { id : userId }
+        })
+        .then(updatedUser => {
+            res.status(200).json({ message: 'User update successfully'});
+        })
+        .catch(err => {
+            if (!err.statusCode) {
+              err.statusCode = 500;
+            }
+            next(err);
+          });
+    })
+
+} 

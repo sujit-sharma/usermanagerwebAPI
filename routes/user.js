@@ -7,8 +7,6 @@ const userController = require('../controllers/user');
 
 const router = express.Router();
 
-//router.get('/',userController.getTest);
-
 router.post('/signup', 
 [
      body('username')
@@ -45,9 +43,27 @@ router.post('/signup',
 userController.postSignup
 );
 
-router.post('/login',userController.postLogin);
+router.post('/login',userController.postLogin );
 
-router.get('/:userId', userController.getUserDetail)
+router.get('/:userId', userController.getUserDetail );
+
+router.put('/update/:userId' ,
+[
+    body('username')
+       .trim(),
+
+   body('email')
+       .isEmail()
+       .normalizeEmail(),
+       
+
+   body('password')
+       .trim()
+       .isLength({ min : 8 })
+       .withMessage('Enter alphanumeric password with minimum 8 characters')
+      // .isAlphanumeric()
+       
+], userController.putUserUpdate );
 
 
 module.exports = router;
