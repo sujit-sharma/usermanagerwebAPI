@@ -311,5 +311,44 @@ exports.deleteMember = (req, res, next )=> {
 }
 
 exports.getAllMembers = (req, res, next ) => {
+    const userId = req.params.userId;
+    const errors = validationResult(req);
+     if (!errors.isEmpty()) {
+        const error = new Error('Validation failed, entered data is incorrect.');
+        error.statusCode = 422;
+        throw error;
+     }
+
+
+     User.findOne({
+         where: {
+             id: userId }
+     })
+     .then(user => {
+        if ( !user ) {
+            const error = new Error('Unauthorized user ');
+            error.statusCode = 401;
+            throw error;
+          }
+          Member.findAll({
+              where: { user_id : userId }
+          })
+          .then(members => {
+              if(!members ){
+                const error = new Error('User does not have any member');
+                error.statusCode = 200;
+                throw error;
+
+              }
+            res.status(200).json({ message: 'member loaded sussfully', members: members});
+          })
+          .catch(err => {
+            if (!err.statusCode) {
+              err.statusCode = 500;
+            }
+            next(err);
+          });
+
+     })
 
 }

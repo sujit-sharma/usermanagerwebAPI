@@ -86,4 +86,9 @@ router.delete('/:userId/:memberId',
 
 ], userController.deleteMember);
 
+router.get('/:userId/members',
+[
+
+], userController.getAllMembers );
+
 module.exports = router;
