@@ -258,3 +258,58 @@ exports.putMemberUpdate = (req, res, next ) => {
       });
 
 }
+
+exports.deleteMember = (req, res, next )=> {
+    const userId = req.params.userId;
+    const memberId = req.params.memberId;
+
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        const error = new Error('Validation failed, entered data is incorrect.');
+        error.statusCode = 422;
+        throw error;
+  }
+  User.findOne({ 
+      where: { id : userId }
+  })
+  .then(user => {
+    if( !user) {
+        const error = new Error('Unauthorize user');
+        error.statusCode = 401;
+        throw error;
+
+    }
+    return Member.findOne({
+        where: { id : memberId }
+    })
+
+    })
+    .then(member => {
+        if( !member) {
+            const error = new Error('Member does not exist');
+            error.statusCode = 502;
+            throw error;
+    
+        }
+        return Member.destory({
+            where: { id: memberId}
+        })
+
+    })
+    .then(result => {
+        console.log(result);
+        res.status(200).json({ message: 'Deleted member' });
+      })
+      .catch(err => {
+        if (!err.statusCode) {
+          err.statusCode = 500;
+        }
+        next(err);
+      });
+
+
+}
+
+exports.getAllMembers = (req, res, next ) => {
+
+}

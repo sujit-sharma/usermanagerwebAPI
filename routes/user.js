@@ -73,12 +73,17 @@ router.put('/:userId/addmember',
 
 ], userController.putNewMember);
 
-router.put('/:userId/updatemember', 
+router.put('/:userId/:memberId', 
 [
 
 
 ],userController.putMemberUpdate );
 
 
+router.delete('/:userId/:memberId', 
+[
+
+
+], userController.deleteMember);
 
 module.exports = router;
