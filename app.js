@@ -15,7 +15,7 @@ const Address = require('./models/address');
 // init app or server
 const app = express();
 
-app.use(bodyParser.json({ type: 'application/*+json' })); //for parsing application/json
+app.use(bodyParser.json()); //for parsing application/json
 
 
 // http methods allowed by this API
@@ -48,7 +48,7 @@ Member.hasOne(Address);
 
 const port = config.port || 8090;
 // synchronizing with database
-Sequel.sync({force: true }) 
+Sequel.sync({force: false }) 
     // starting node js server
     .then( app.listen(port, err => {
         if(err) console.log(err);
