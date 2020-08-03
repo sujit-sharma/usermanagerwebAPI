@@ -3,9 +3,12 @@ const db = require('../database');
 
 module.exports = db.define("member", {
   id: {
-    type: Sequelize.STRING,
+    type: Sequelize.INTEGER,
     allowNull: false,
-    primaryKey: true
+    primaryKey: true,
+    aotoIncrement : true,///make this auto increment see http ....
+    default : 1
+  
   },
   fname: {
     type: Sequelize.STRING,

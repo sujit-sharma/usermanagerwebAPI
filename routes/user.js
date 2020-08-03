@@ -1,5 +1,6 @@
 const express = require('express');
 const { body } = require('express-validator');
+const isAuth = require('../middlewares/is-auth');
 
 const User = require('../models/user');
 const userController = require('../controllers/user');
@@ -9,7 +10,7 @@ const router = express.Router();
 
 
 //GET/api/user/:userId
-router.get('/:userId', userController.getUserDetail );
+router.get('/:userId', isAuth , userController.getUserDetail );
 
 
 //PUT/api/user/update/:userId
@@ -29,17 +30,30 @@ router.put('/update/:userId' ,
        .withMessage('Enter alphanumeric password with minimum 8 characters')
       // .isAlphanumeric()
        
-], userController.putUserUpdate );
+], isAuth, userController.putUserUpdate );
 
 
-//PUT/api/user/:userId/addmember
-router.put('/:userId/addmember', 
+//PUT/api/user/addmember/:userId
+router.put('/addmember/:userId', 
 [
+    body('fname')
+    .isString(),
+    body('lname')
+    .isString(),
     body('email')
-    //.isEmail()
+    .isEmail()
     .normalizeEmail(),
+    body('phone')
+    .isNumeric(),
+    body('provision')
+    .isNumeric()
+    .isLength({ min: 1, max: 7 }),
+    body('district')
+    .isString(),
+    body('city')
+    .isString()
 
-], userController.putNewMember);
+], isAuth, userController.putNewMember);
 
 
 //PUT/api/user/:userId/:memberId
@@ -47,7 +61,7 @@ router.put('/:userId/:memberId',
 [
 
 
-],userController.putMemberUpdate );
+], isAuth, userController.putMemberUpdate );
 
 
 //DELETE/api/user/:userId/:memberId
@@ -55,13 +69,13 @@ router.delete('/:userId/:memberId',
 [
 
 
-], userController.deleteMember);
+], isAuth, userController.deleteMember);
 
 
 //get/api/user/:userId/members
 router.get('/:userId/members',
 [
 
-], userController.getAllMembers );
+], isAuth, userController.getAllMembers );
 
 module.exports = router;

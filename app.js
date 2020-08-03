@@ -43,12 +43,12 @@ app.use((error, req, res, next) => {
   });
 
 //establishing database relations
-User.hasMany(Member);
-Member.hasOne(Address);
+ Member.belongsTo(User, {onDelete: 'CASCADE' });
+ Member.belongsTo(Address);
 
 const port = config.port || 8090;
 // synchronizing with database
-Sequel.sync({force: false }) 
+Sequel.sync({ force: true }) 
     // starting node js server
     .then( app.listen(port, err => {
         if(err) console.log(err);

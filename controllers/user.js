@@ -9,7 +9,7 @@ const Address = require('../models/address');
 
 
 
-exports.getUserDetail = (req, res, next ) => {
+exports.getUserDetail = (req, res, next ) => {application
 
     const userId = req.params.userId;
 
@@ -86,8 +86,8 @@ exports.putUserUpdate = (req, res, next ) => {
 } 
 
 exports.putNewMember = (req, res, next ) => {
-    const userId = req.params.userId;
-    console.log("user is11111" +userId);
+    const userId = req.userId.toString();
+    
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       const error = new Error('Validation failed, entered data is incorrect.');
@@ -101,35 +101,41 @@ exports.putNewMember = (req, res, next ) => {
     const provision = req.body.provision;
     const district = req.body.district;
     const city = req.body.city;
-
-    User.findOne({
-        where: {
-            id: userId
-        }
-    })
-    .then(user => {
-        if( !user) {
-            const error = new Error('Unauthorize ');
-            error.statusCode = 401;
-            throw error;
-
-        }
-        Member.findOne({
+   
+        
+    Member.findOne({
             where:  { email: email }
         })
-        Member.create({
-            lname: lname,
-            fname :fname,
-            email: email, 
-            phone: phone        
-        },{
-            include: [{ model: Address ({provision: provision, district: district,city: city })}]
+        .then(member => {
+            if (member ) {
+                const error = new Error('Member already exist ');
+                error.statusCode = 203;
+                throw error;
+
+            }
+        return Address.create({
+            provision: provision,
+            district: district,
+            city: city 
+
+            })
         })
-        .then(result => {
-            res.status(200).json({ message: 'Member added successfully',  result });
-          })
-        
+        .then(addres => {
+            return Member.create({
+                id: 5,
+                lname: lname,
+                fname :fname,
+                email: email, 
+                phone: phone,
+                addressId : addres.id,
+                userId :   userId
+            })
+     
     })
+    .then(result => {
+            res.status(200).json({ message: 'Member added successfully',  result });
+    })
+        
     .catch(err => {
         if (!err.statusCode) {
           err.statusCode = 500;
