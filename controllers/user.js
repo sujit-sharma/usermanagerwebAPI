@@ -21,7 +21,7 @@ exports.getUserDetail = (req, res, next ) => {
     .then(userdetail => {
         if (!userdetail) {
             const error = new Error('User does not exist');
-            error.statusCode = 400;
+            error.statusCode = 404;
             throw error;
         }
         res.status(200).json({ message: 'User detail received' , userdetail : userdetail })
@@ -106,7 +106,7 @@ exports.putNewMember = (req, res, next ) => {
         .then(member => {
             if (member ) {
                 const error = new Error('Member already exist ');
-                error.statusCode = 203;
+                error.statusCode = 208;
                 throw error;
 
             }
@@ -166,38 +166,40 @@ exports.putMemberUpdate = (req, res, next ) => {
     const phone = req.body.phone;
     const provision = req.body.provision;
     const district = req.body.district;
-    const city = req.body.city;
+    const city = req.body.city;    
+
+
+         Member.update({
+         
+             attributes: {
+                fname: fname,
+                lname: lname,
+                email: email,
+                phone: phone
+
+             },
+
+            include: [{
+                model: Address,
+                attributes: [{
+                    provision: provision,
+                    district: district,
+                    city: city
+                }],
+            
+            }],
+
+            where: {id: memberId },
+            
+
+
+
     
-    let onemember;
-
-    Member.findOne({
-        where: {
-            id: memberId
-        }
     })
-    .then(member => {
-        if( !member) {
-            const error = new Error(' Member doesnot exixt ');
-            error.statusCode = 401;
-            throw error;
-
-        }
-        onemember = member;
-       return Address.update({provision: provision, district: district,city: city, where: { id : onemember.id }})
-
-    })
-    .then(address => {
-       Member.update({
-            lname: lname,
-            fname :fname,
-            email: email, 
-            phone: phone        
-        })
-        .then(result => {
-            res.status(200).json({ message: 'Member updated successfully',  result, address: address });
+    .then(result => {
+            res.status(200).json({ message: 'Member updated successfully'});
           })       
 
-    })
     .catch(err => {
         if (!err.statusCode) {
           err.statusCode = 500;
@@ -223,7 +225,7 @@ exports.deleteMember = (req, res, next )=> {
   .then(member => {
     if( !member) {
         const error = new Error('Member does not exist');
-        error.statusCode = 401;
+        error.statusCode = 404;
         throw error;
 
     }
