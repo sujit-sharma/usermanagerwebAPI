@@ -4,10 +4,8 @@ const db = require('../database');
 module.exports = db.define("member", {
   id: {
     type: Sequelize.INTEGER,
-    allowNull: false,
-    primaryKey: true,
-    aotoIncrement : true,///make this auto increment see http ....
-    default : 1
+    autoIncrement: true,
+    primaryKey: true
   
   },
   fname: {
@@ -28,9 +26,5 @@ module.exports = db.define("member", {
     allowNull: true,
     unique: true,
   },
-//   gender: {
-//       type: Sequelize.DataTypes.ENUM,
-//       Values: ['Male', 'Female'],
-//       allowNull: false
-//   }
+
 });

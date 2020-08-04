@@ -72,8 +72,8 @@ router.delete('/:userId/:memberId',
 ], isAuth, userController.deleteMember);
 
 
-//get/api/user/:userId/members
-router.get('/:userId/members',
+//get/api/user/members:userId
+router.get('/members/:userId',
 [
 
 ], isAuth, userController.getAllMembers );

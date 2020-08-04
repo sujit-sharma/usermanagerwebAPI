@@ -9,9 +9,9 @@ const Address = require('../models/address');
 
 
 
-exports.getUserDetail = (req, res, next ) => {application
+exports.getUserDetail = (req, res, next ) => {
 
-    const userId = req.params.userId;
+    const userId = req.userId;
 
     User.findOne({
         where: {
@@ -24,10 +24,7 @@ exports.getUserDetail = (req, res, next ) => {application
             error.statusCode = 400;
             throw error;
         }
-        res.status(200).json({ message: 'User detail received' , userId : userdetail.id,
-                                username: userdetail.username, password : userdetail.password,
-                                email: userdetail.email
-                            })
+        res.status(200).json({ message: 'User detail received' , userdetail : userdetail })
     })
     .catch(err =>{
         if(!err.statusCode) {
@@ -39,7 +36,7 @@ exports.getUserDetail = (req, res, next ) => {application
 
 }
 exports.putUserUpdate = (req, res, next ) => {
-    const userId = req.params.userId;
+    const userId = req.userId;
     const errors = validationResult(req);
     if( !errors.isEmpty ()) {
         const error = new Error('Validation failed , enter correct data');
@@ -58,12 +55,13 @@ exports.putUserUpdate = (req, res, next ) => {
     })
     .then(user => {
         if(!user ) {
-            const error = new Error('Could not find user');
+            const error = new Error('User Does not exist');
             error.statusCode = 404;
             throw err;
         }
-        bcrypt.hash(password, 16)
-        .then(hashedPasswd => {
+        return bcrypt.hash(password, 16)
+    })
+    .then(hashedPasswd => {
             return User.update({   email: email,
                                     username: username,
                                     password: hashedPasswd
@@ -72,8 +70,8 @@ exports.putUserUpdate = (req, res, next ) => {
                 })
             })
      
-        .then(updatedUser => {
-            res.status(200).json({ message: 'User update successfully'});
+    .then(updatedUser => {
+            res.status(200).json({ message: 'User update successfully', UpdatedUser: updatedUser });
         })
         .catch(err => {
             if (!err.statusCode) {
@@ -81,7 +79,6 @@ exports.putUserUpdate = (req, res, next ) => {
             }
             next(err);
           });
-    })
 
 } 
 
@@ -122,7 +119,6 @@ exports.putNewMember = (req, res, next ) => {
         })
         .then(addres => {
             return Member.create({
-                id: 5,
                 lname: lname,
                 fname :fname,
                 email: email, 
@@ -146,7 +142,7 @@ exports.putNewMember = (req, res, next ) => {
 }
 
 exports.putMemberUpdate = (req, res, next ) => {
-    const userId = req.params.userId;
+    const userId = req.userId;
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       const error = new Error('Validation failed, entered data is incorrect.');
@@ -160,15 +156,16 @@ exports.putMemberUpdate = (req, res, next ) => {
     const provision = req.body.provision;
     const district = req.body.district;
     const city = req.body.city;
+    const memberId = req.body.memberId;
 
-    User.findOne({
+    Member.findOne({
         where: {
-            id: userId
+            id: memberId
         }
     })
-    .then(user => {
-        if( !user) {
-            const error = new Error('Unauthorize ');
+    .then(member => {
+        if( !member) {
+            const error = new Error(' Member doesnot exixt ');
             error.statusCode = 401;
             throw error;
 
@@ -196,7 +193,7 @@ exports.putMemberUpdate = (req, res, next ) => {
 }
 
 exports.deleteMember = (req, res, next )=> {
-    const userId = req.params.userId;
+    const userId = req.userId;
     const memberId = req.params.memberId;
 
     const errors = validationResult(req);
@@ -205,29 +202,17 @@ exports.deleteMember = (req, res, next )=> {
         error.statusCode = 422;
         throw error;
   }
-  User.findOne({ 
-      where: { id : userId }
+  Member.findOne({ 
+      where: { id : memberId }
   })
-  .then(user => {
-    if( !user) {
-        const error = new Error('Unauthorize user');
+  .then(member => {
+    if( !member) {
+        const error = new Error('Member does not exist');
         error.statusCode = 401;
         throw error;
 
     }
-    return Member.findOne({
-        where: { id : memberId }
-    })
-
-    })
-    .then(member => {
-        if( !member) {
-            const error = new Error('Member does not exist');
-            error.statusCode = 502;
-            throw error;
-    
-        }
-        return Member.destory({
+    return Member.destroy({
             where: { id: memberId}
         })
 
@@ -247,27 +232,15 @@ exports.deleteMember = (req, res, next )=> {
 }
 
 exports.getAllMembers = (req, res, next ) => {
-    const userId = req.params.userId;
+    const userId = req.userId;
     const errors = validationResult(req);
      if (!errors.isEmpty()) {
         const error = new Error('Validation failed, entered data is incorrect.');
         error.statusCode = 422;
         throw error;
      }
-
-
-     User.findOne({
-         where: {
-             id: userId }
-     })
-     .then(user => {
-        if ( !user ) {
-            const error = new Error('Unauthorized user ');
-            error.statusCode = 401;
-            throw error;
-          }
-          Member.findAll({
-              where: { user_id : userId }
+        Member.findAll({
+              where: { userId : userId }
           })
           .then(members => {
               if(!members ){
@@ -284,7 +257,5 @@ exports.getAllMembers = (req, res, next ) => {
             }
             next(err);
           });
-
-     })
 
 }

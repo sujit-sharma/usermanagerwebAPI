@@ -48,7 +48,7 @@ app.use((error, req, res, next) => {
 
 const port = config.port || 8090;
 // synchronizing with database
-Sequel.sync({ force: true }) 
+Sequel.sync({ force: false }) 
     // starting node js server
     .then( app.listen(port, err => {
         if(err) console.log(err);
