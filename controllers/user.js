@@ -127,7 +127,7 @@ exports.putNewMember = (req, res, next ) => {
                 userId :   userId
             })
             .then(result => {
-                res.status(200).json({ message: 'Member added successfully',  result ,address: address});
+                res.status(200).json({ message: 'Member added successfully' });
         })
         .catch(err => {
             if( err ){
@@ -152,6 +152,8 @@ exports.putNewMember = (req, res, next ) => {
 
 exports.putMemberUpdate = (req, res, next ) => {
     const userId = req.userId;
+    const memberId = req.params.memberId;
+
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       const error = new Error('Validation failed, entered data is incorrect.');
@@ -165,7 +167,6 @@ exports.putMemberUpdate = (req, res, next ) => {
     const provision = req.body.provision;
     const district = req.body.district;
     const city = req.body.city;
-    const memberId = req.body.memberId;
     
     let onemember;
 
@@ -182,7 +183,7 @@ exports.putMemberUpdate = (req, res, next ) => {
 
         }
         onemember = member;
-       return Address.update({provision: provision, district: district,city: city, where: { id : '3' }})
+       return Address.update({provision: provision, district: district,city: city, where: { id : onemember.id }})
 
     })
     .then(address => {
@@ -254,8 +255,14 @@ exports.getAllMembers = (req, res, next ) => {
         throw error;
      }
         Member.findAll({
+              include: [{
+                  model: Address
+              }],
               where: { userId : userId }
+
+
           })
+
           .then(members => {
               if(!members ){
                 const error = new Error('User does not have any member');
@@ -263,7 +270,7 @@ exports.getAllMembers = (req, res, next ) => {
                 throw error;
 
               }
-            res.status(200).json({ message: 'member loaded sussfully', members: members, address: address });
+            res.status(200).json({ message: 'member loaded sussfully', members: members});
           })
           .catch(err => {
             if (!err.statusCode) {
