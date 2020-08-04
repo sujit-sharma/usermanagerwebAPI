@@ -312,8 +312,10 @@ exports.getAllMembers = (req, res, next ) => {
      }
         Member.findAll({
               include: [{
-                  model: Address
+                  model: Address,
               }],
+              where: {userId : userId }
+              
               
           }, {where: { userId : userId }},
           {
