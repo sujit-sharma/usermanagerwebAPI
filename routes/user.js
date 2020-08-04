@@ -59,7 +59,22 @@ router.put('/addmember/:userId',
 //PUT/api/user/:userId/:memberId
 router.put('/:userId/:memberId', 
 [
-
+    body('fname')
+    .isString(),
+    body('lname')
+    .isString(),
+    body('email')
+    .isEmail()
+    .normalizeEmail(),
+    body('phone')
+    .isNumeric(),
+    body('provision')
+    .isNumeric()
+    .isLength({ min: 1, max: 7 }),
+    body('district')
+    .isString(),
+    body('city')
+    .isString()
 
 ], isAuth, userController.putMemberUpdate );
 
