@@ -11,7 +11,12 @@ const Address = require('../models/address');
 
 exports.getUserDetail = (req, res, next ) => {
 
-    const userId = req.userId;
+    const userId = req.params.userId;
+    if(userId !== req.userId ) {
+        const error = new Error('Not authorized');
+        error.statusCode = 403;
+        throw error;
+    }
 
     User.findOne({
         where: {
@@ -36,7 +41,13 @@ exports.getUserDetail = (req, res, next ) => {
 
 }
 exports.putUserUpdate = (req, res, next ) => {
-    const userId = req.userId;
+    const userId = req.params.userId;
+    if(userId !== req.userId ) {
+        const error = new Error('Not authorized');
+        error.statusCode = 403;
+        throw error;
+    }
+
     const errors = validationResult(req);
     if( !errors.isEmpty ()) {
         const error = new Error('Validation failed , enter correct data');
@@ -83,7 +94,12 @@ exports.putUserUpdate = (req, res, next ) => {
 } 
 
 exports.putNewMember = (req, res, next ) => {
-    const userId = req.userId.toString();
+    const userId = req.params.userId;
+    if(userId !== req.userId ) {
+        const error = new Error('Not authorized');
+        error.statusCode = 403;
+        throw error;
+    }
     
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -151,8 +167,13 @@ exports.putNewMember = (req, res, next ) => {
 }
 
 exports.putMemberUpdate = (req, res, next ) => {
-    const userId = req.userId;
+    const userId = req.params.userId;
     const memberId = req.params.memberId;
+    if(userId !== req.userId ) {
+        const error = new Error('Not authorized');
+        error.statusCode = 403;
+        throw error;
+    }
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -168,8 +189,22 @@ exports.putMemberUpdate = (req, res, next ) => {
     const district = req.body.district;
     const city = req.body.city;    
 
+    Member.findOne({
+        where: {
+            [ Op.and ]: [
+                { id : memberId },
+                { userId: userId }
+            ]
+        }
+    })
+    .then(member => {
+        if( !member) {
+            const error = new Error(' Member doesnot exixt ');
+            error.statusCode = 404;
+            throw error;
 
-         Member.update({
+        }
+         return Member.update({
          
              attributes: {
                 fname: fname,
@@ -187,11 +222,16 @@ exports.putMemberUpdate = (req, res, next ) => {
                     city: city
                 }],
             
-            }],
+            }]
 
-            where: {id: memberId },
             
-
+            
+        }, {where: {
+            [ Op.and ]: [
+                { id : memberId },
+                { userId: userId }
+            ]
+        } });
 
 
     
@@ -210,8 +250,13 @@ exports.putMemberUpdate = (req, res, next ) => {
 }
 
 exports.deleteMember = (req, res, next )=> {
-    const userId = req.userId;
+    const userId = req.params.userId;
     const memberId = req.params.memberId;
+    if(userId !== req.userId ) {
+        const error = new Error('Not authorized');
+        error.statusCode = 403;
+        throw error;
+    }
 
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -220,17 +265,21 @@ exports.deleteMember = (req, res, next )=> {
         throw error;
   }
   Member.findOne({ 
-      where: { id : memberId }
+      where: {[Op.and]: [{ id : memberId },{userId : userId }]}
   })
   .then(member => {
     if( !member) {
         const error = new Error('Member does not exist');
-        error.statusCode = 404;
+        error.statusCode = 401;
         throw error;
 
     }
     return Member.destroy({
-            where: { id: memberId}
+            where: {
+                [Op.and]: 
+                [{ id : memberId },
+                    {userId : userId }
+                ]}
         })
 
     })
@@ -249,7 +298,12 @@ exports.deleteMember = (req, res, next )=> {
 }
 
 exports.getAllMembers = (req, res, next ) => {
-    const userId = req.userId;
+    const userId = req.params.userId;
+    if(userId !== req.userId ) {
+        const error = new Error('Not authorized');
+        error.statusCode = 403;
+        throw error;
+    }
     const errors = validationResult(req);
      if (!errors.isEmpty()) {
         const error = new Error('Validation failed, entered data is incorrect.');
@@ -260,9 +314,10 @@ exports.getAllMembers = (req, res, next ) => {
               include: [{
                   model: Address
               }],
-              where: { userId : userId }
-
-
+              
+          }, {where: { userId : userId }},
+          {
+              district: true
           })
 
           .then(members => {

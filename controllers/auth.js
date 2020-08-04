@@ -80,3 +80,16 @@ exports.postLogin = (req, res, next ) => {
         next(err);
     });
 }
+
+
+exports.postLogout = (req, res, next ) => {
+    const userId = req.params.userId;
+    if(userId !== req.userId ) {
+        const error = new Error('Not authorized');
+        error.statusCode = 403;
+        throw error;
+    }
+        
+        res.status(200).json({ message: 'Logout Sucess delete the token from client side' })
+   
+}
