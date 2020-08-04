@@ -71,7 +71,7 @@ exports.putUserUpdate = (req, res, next ) => {
             })
      
     .then(updatedUser => {
-            res.status(200).json({ message: 'User update successfully', UpdatedUser: updatedUser });
+            res.status(200).json({ message: 'User update successfully'});
         })
         .catch(err => {
             if (!err.statusCode) {
@@ -117,21 +117,30 @@ exports.putNewMember = (req, res, next ) => {
 
             })
         })
-        .then(addres => {
-            return Member.create({
+        .then(address => {
+             Member.create({
                 lname: lname,
                 fname :fname,
                 email: email, 
                 phone: phone,
-                addressId : addres.id,
+                addressId : address.id,
                 userId :   userId
             })
+            .then(result => {
+                res.status(200).json({ message: 'Member added successfully',  result ,address: address});
+        })
+        .catch(err => {
+            if( err ){
+                const error = new Error('Error in database');
+                error.statusCode =422;
+                throw error;
+            }
+            
+        })
+
      
     })
-    .then(result => {
-            res.status(200).json({ message: 'Member added successfully',  result });
-    })
-        
+           
     .catch(err => {
         if (!err.statusCode) {
           err.statusCode = 500;
@@ -157,6 +166,8 @@ exports.putMemberUpdate = (req, res, next ) => {
     const district = req.body.district;
     const city = req.body.city;
     const memberId = req.body.memberId;
+    
+    let onemember;
 
     Member.findOne({
         where: {
@@ -170,18 +181,21 @@ exports.putMemberUpdate = (req, res, next ) => {
             throw error;
 
         }
-        Member.update({
+        onemember = member;
+       return Address.update({provision: provision, district: district,city: city, where: { id : '3' }})
+
+    })
+    .then(address => {
+       Member.update({
             lname: lname,
             fname :fname,
             email: email, 
             phone: phone        
-        },{
-            include: [{ model: Address ({provision: provision, district: district,city: city })}]
         })
         .then(result => {
-            res.status(200).json({ message: 'Member updated successfully',  result });
-          })
-        
+            res.status(200).json({ message: 'Member updated successfully',  result, address: address });
+          })       
+
     })
     .catch(err => {
         if (!err.statusCode) {
@@ -249,7 +263,7 @@ exports.getAllMembers = (req, res, next ) => {
                 throw error;
 
               }
-            res.status(200).json({ message: 'member loaded sussfully', members: members});
+            res.status(200).json({ message: 'member loaded sussfully', members: members, address: address });
           })
           .catch(err => {
             if (!err.statusCode) {
